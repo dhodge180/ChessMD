@@ -39,6 +39,12 @@ void NotationViewer::setRootMove(const QSharedPointer<NotationMove>& notation)
 {
     m_rootMove = notation;
     m_selectedMove = m_rootMove;
+    
+    // Force board refresh with potentially custom FEN
+    if (!m_rootMove.isNull() && !m_rootMove->m_position.isNull()) {
+        m_rootMove->m_position->setBoardData(convertFenToBoardData(m_rootMove->FEN));
+    }
+    
     clearLayout();
     layoutNotation();
     emit moveSelected(m_selectedMove);

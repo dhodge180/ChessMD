@@ -35,8 +35,28 @@ bool isHeaderLine(const std::string &line) {
     return i == line.size();
 }
 
+void parseGameFromPGN(PGNGame &game, bool openingCutoff) {
+     // Initialize root move if it doesn't exist yet
+    if (game.rootMove.isNull()) {
+        ChessPosition startPos;
+        game.rootMove = QSharedPointer<NotationMove>::create("", startPos);
+    }
+    // Look for and save FEN in header, if present
+    QString fenHeader = "";
+    for (const auto &h : game.headerInfo) {
+        if (h.first == "FEN") {
+            fenHeader = h.second;
+            break;
+        }
+    }
+    // Parse with original function, but passing fenHeader too
+    parseBodyText(game.bodyText, game.rootMove, openingCutoff, fenHeader);
+}
 
-void parseBodyText(QString &bodyText, QSharedPointer<NotationMove> &rootMove, bool openingCutoff){
+void parseBodyText(QString &bodyText, QSharedPointer<NotationMove> &rootMove, bool openingCutoff, const QString &fenHeader){
+    if(!fenHeader.isEmpty()) {
+        rootMove->FEN = fenHeader;
+    }
     rootMove->m_position->setBoardData(convertFenToBoardData(rootMove->FEN));
     parseBodyAndBuild(bodyText, rootMove, openingCutoff);
 }
@@ -93,6 +113,9 @@ std::vector<PGNGame> StreamParser::parseDatabase(){
 
             if (tag == "Result"){
                 game.result = value;
+            }
+            else if (tag == "FEN"){
+                game.fenStartPosition = value;
             }
 
             game.headerInfo.push_back({tag, value});

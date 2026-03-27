@@ -20,6 +20,7 @@ public:
     QSharedPointer<NotationMove> rootMove;
     QVector<QPair<QString,QString>> headerInfo;
     QString result;
+    QString fenStartPosition;
     QString bodyText;
     int dbIndex;
     bool isParsed;
