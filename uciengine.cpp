@@ -67,9 +67,10 @@ void UciEngine::setPosition(const QString &fen) {
     else sendCommand(QString("position fen %1").arg(fen));
 }
 
-void UciEngine::startInfiniteSearch(int maxMultiPV) {
+void UciEngine::startInfiniteSearch(int maxMultiPV, const QString &fen) {
     stopSearch();
     setOption("MultiPV", QString::number(maxMultiPV));
+    setPosition(fen);
     sendCommand("go infinite");
 }
 
@@ -101,7 +102,8 @@ void UciEngine::goDepth(int depth) {
 }
 
 void UciEngine::uciNewGame() {
-    sendCommand("ucinewgame");
+    // Edited
+    sendCommand("ucinewgame", false);
     m_ready = false;
     sendCommand("isready", false);
 }

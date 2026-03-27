@@ -56,8 +56,26 @@ void parseGameFromPGN(PGNGame &game, bool openingCutoff) {
 void parseBodyText(QString &bodyText, QSharedPointer<NotationMove> &rootMove, bool openingCutoff, const QString &fenHeader){
     if(!fenHeader.isEmpty()) {
         rootMove->FEN = fenHeader;
+        QStringList parts = fenHeader.split(' ');
+        rootMove->m_position->setBoardData(convertFenToBoardData(fenHeader));
+        if (parts.size() >= 2) rootMove->m_position->m_sideToMove = parts[1][0].toLatin1();
+        if (parts.size() >= 3) {
+            QString cr = parts[2];
+            rootMove->m_position->setCastlingRights(
+                cr.contains('K'),
+                cr.contains('Q'),
+                cr.contains('k'),
+                cr.contains('q')
+            );
+        }
+        rootMove->m_position->setFenState(
+        parts.size() >= 4 ? parts[3] : "-",
+        parts.size() >= 5 ? parts[4].toInt() : 0,
+        parts.size() >= 6 ? parts[5].toInt() : 1
+        );
+    } else {
+        rootMove->m_position->setBoardData(convertFenToBoardData(rootMove->FEN));
     }
-    rootMove->m_position->setBoardData(convertFenToBoardData(rootMove->FEN));
     parseBodyAndBuild(bodyText, rootMove, openingCutoff);
 }
 
